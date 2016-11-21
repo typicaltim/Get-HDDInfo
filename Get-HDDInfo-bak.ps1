@@ -1,6 +1,6 @@
 # Variables
     # Location to look for and save the catalog file
-    $SavedHDDCatalog = "L:\ocation\of\savedhddcatalog.csv"
+    $SavedHDDCatalog = "\\covchfs1\Software\scripts\hddscraper\savedhddcatalog.csv"
 
 # Input
     # Ask the user for the drive letter of the connected HDD to make sure it doesn't pull the wrong information
