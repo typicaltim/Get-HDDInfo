@@ -10,6 +10,7 @@ $PathToNetSetupLog = "$SelectedDriveLetter" + ":\windows\debug\NetSetup.LOG"
 # If the HDD doesn't have that log file, give the user a heads up.
 if (-not (Test-Path $PathToNetSetupLog)) {
   Write-Host "WARNING: The Hostname associated with this HDD/SSD was not found, this column will be left blank. This is okay." -ForegroundColor Red
+  $ScrapedHostName = 'UNKNOWN'
 }
 
 # If the HDD does have that log file, go ahead and do this:
@@ -72,7 +73,7 @@ $ScrapedUserList | ForEach{
 # Verify with the user that the information pulled from the HDD/SSD looks alright
 Write-Host 'Please note the information scraped from the HDD/SSD, does this look correct?'
 # Show them the object information
-$SavedHDDInformation 
+$SavedHDDInformation
 # Ask them if it's cool
 $UserConfirmation = Read-Host -Prompt '(Y/N)'
 
@@ -85,7 +86,7 @@ Set-Content $HDDIndexNumberFile $HDDIndexNumber
 
 # Append this information to the spreadsheet file
 $SavedHDDInformation | Export-CSV $SavedHDDCatalog -NoType -Append -Force
-Write-Host "Saved. Please Label the HDD/SSD with the HDD Index Number found above." -ForegroundColor Green
+Write-Host Saved. Please Label the HDD/SSD with the HDD Index Number found above. -ForegroundColor Green
 }
 if ($UserConfirmation -eq "N"){
 Write-Host "!!!THIS INFORMATION HAS NOT BEEN SAVED!!!" -ForegroundColor Red
