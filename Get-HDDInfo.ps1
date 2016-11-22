@@ -93,9 +93,9 @@
     # Create an Object that will contain the information
     $SavedHDDInformation = New-Object PSObject
     # Add the column for the HDDIndexNumber that will be used to identify the individual HDD
-    $SavedHDDInformation | add-member –membertype NoteProperty –name HDDIndexNumber –Value $NewHDDIndexNumber
+    $SavedHDDInformation | add-member -membertype NoteProperty -name HDDIndexNumber -Value $NewHDDIndexNumber
     # Add the column for the Host Name information that has been pulled from the HDD
-    $SavedHDDInformation | add-member –membertype NoteProperty –name HostName –Value $ScrapedHostName
+    $SavedHDDInformation | add-member -membertype NoteProperty -name HostName -Value $ScrapedHostName
 
     # Set a counter that will increment for each user profile found on the HDD
     $UserCount = 0
@@ -111,7 +111,7 @@
       # Set the Object's Host name Value to the HostName Value pulled from the HDD
       $SavedHDDInformation.HostName = $ScrapedHostName
       # Create a column named after the user counter value and set the value to the current user in the list
-      Add-Member -InputObject $SavedHDDInformation –membertype NoteProperty –name $PropName -Value $_[0].Name
+      Add-Member -InputObject $SavedHDDInformation -membertype NoteProperty -name $PropName -Value $_[0].Name
     }
 
 # Write-out
