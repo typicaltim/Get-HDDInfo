@@ -1,6 +1,6 @@
 # Variables
     # Location to look for and save the catalog file
-    $SavedHDDCatalog = "C:\users\ttaylor\desktop\savedhddcatalog.csv"
+    $SavedHDDCatalog = "L:\ocation\of\savedhddcatalog.csv"
         # Make sure that a catalog file exists
         if (-not (Test-Path $SavedHDDCatalog)) {
             Write-Host "INFO: No catalog file found. A new Catalog file will be created." -ForegroundColor Yellow
