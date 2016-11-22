@@ -1,2 +1,8 @@
 # Get-HDDInfo
 A hacky Powershell script that will grab the hostname for the machine that the HDD was installed with and gives a list of users that were logged into it. Works with XP and Windows 7 drives.
+
+# How do I use it?
+First of all this script was made for a very special purpose, but could be used for a purpose other than my intended one. I don't anticipate anyone will reference this let alone actually use this for anything. But basically you connect a drive to the computer and note which drive letter the OS partition is on, then tell the script what drive letter that is. First an "index number" will be assigned to the drive. This is meant to be marked, stickered, etched, or some other way put on the physical drive and then that physical drive would be stored somewhere safe for later reference. Then the script will (use a really hacky method that barely works to) grab the last hostname the machine used to join/unjoin a domain from this file I found that logs that info. Then it will list all the user folder names into an array. The index number, hostname, and user list will all be saved to a CSV after confirmation. This CSV is then meant to be queried for whatever purpose. At the top of the script is a variable that will determine the location where the CSV file is desired to be. This variable is used for reading and writing, make sure to change that before running it.
+
+# Note
+This is in no way perfect. If you do use this, please take a gander at the issues page before running the script. I rushed this script together and because of that there are some minor-ish problems. ;)
