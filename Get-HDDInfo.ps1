@@ -1,28 +1,58 @@
 # Variables
     # Location to look for and save the catalog file
     $SavedHDDCatalog = "L:\ocation\of\savedhddcatalog.csv"
+    
+    # Make sure that a catalog file exists
+    if (-not (Test-Path $SavedHDDCatalog)) {
+      Write-Host "WARNING: No catalog file found. A new Catalog file will be created." -ForegroundColor Yellow
+      # Create the Catalog file and spit the output to null so it doesn't bother the user, it looks ugly
+      New-Item $SavedHDDCatalog | Out-Null
+    }
 
 # Input
     # Ask the user for the drive letter of the connected HDD to make sure it doesn't pull the wrong information
     $SelectedDriveLetter = Read-Host -Prompt 'Enter Drive Letter of HDD'
     $PathToNetSetupLog = "$SelectedDriveLetter" + ":\windows\debug\NetSetup.LOG"
 
-# HDD Index Number
+# HDD Index Number - Old Way
+    # Wipe variables
+#   $NewHDDIndexNumber = "poop"
     # Get the last row from the savedhddcatalog.csv
-    $ReadLastDataRow = (Get-Content $SavedHDDCatalog)[-1]
+#   $ReadLastDataRow = (Get-Content $SavedHDDCatalog)[-1]
     # Split each column apart into an array
-    $LastDataRowArray = $ReadLastDataRow.Split(",")
+#   $LastDataRowArray = $ReadLastDataRow.Split(",")
     # Select the first column (which is the last index number) and write that into a variable
-    $LastHDDIndexNumber = $LastDataRowArray[0]
+#   $LastHDDIndexNumber = $LastDataRowArray[0]
     # Take the last index number and convert it to a decimal (it's text right now)
-    [int]$NewHDDIndexNumber =
+#   [int]$NewHDDIndexNumber = $LastHDDIndexNumber
     # Increment it by one, that will be the new number for our object to use later
-    $NewHDDIndexNumber++
+#   $NewHDDIndexNumber++
+# -----------------------------
+
+# HDD Index Number - New Way
+    # Try to pull the last entry from the catalog (suppress the annoying error if it pops up, we will deal with that next)
+    $lastDataEntry = import-csv $SavedHDDCatalog | select -last 1 -ErrorAction SilentlyContinue
+    # If the last entry index number doesn't exist, or is less than one - the catalog is probably blank so do the following:
+    if ($lastDataEntry.HDDIndexNumber -ne "" -and $lastDataEntry.HDDIndexNumber -lt 1){
+        # Let the user know that we will set the HDD Index Number Value
+        Write-Host "No data found in catalog file, setting HDD Index Number to 1" -ForegroundColor Yellow
+        # Do what we said we were going to do
+        [int]$newHDDIndexNumber = 1
+    }
+    # In the case that the last index number found is not blank and is equal to or greater than one, this is probably an existing file - so do this:
+    else {
+        # Let the user know that we found the data in the file and new stuff will be appended to the Catalog - verbatim :)
+        Write-Host "Data was found in Catalog file, new entries will be appended to the Catalog" -ForegroundColor Yellow
+        # Convert the last HDD Index Number value from a string to an integer and save it to a variable so we can do math with it
+        [int]$newHDDIndexNumber = [int]$lastDataEntry.HDDIndexNumber
+        # Increase the value of the HDD Index Number by one so that it is ready to be used later if we want to write a new entry to the catalog
+        $newHDDIndexNumber++
+    }
 
 # Hostname
     # If the HDD doesn't have that log file, give the user a heads up.
     if (-not (Test-Path $PathToNetSetupLog)) {
-      Write-Host "     WARNING: The Hostname associated with this HDD/SSD was not found, this column will be marked 'UNKNOWN'. This is okay." -ForegroundColor Yellow
+      Write-Host "WARNING: The Hostname associated with this HDD/SSD was not found, this column will be marked 'UNKNOWN'. This is okay." -ForegroundColor Yellow
       $ScrapedHostName = "UNKNOWN"
     }
 
@@ -34,6 +64,11 @@
         $SplitDebugHostnameScrape = $DebugHostnameScrape -split ' '
         # Select the Host Name from the array
         $ScrapedHostName = $SplitDebugHostnameScrape[6]
+        # If the Hostname is blank for whatever reason, set it to UNKNOWN - unfortunately the method for grabbing host name that I'm using isn't a perfect method
+        if ($ScrapedHostName -Match ""){
+            Write-Host "WARNING: The script tried it's best to find a hostname, but for some reason nothing turned up. The hostname will be set to UNKNOWN." -ForegroundColor Yellow
+            $ScrapedHostName = "UNKNOWN"
+        }
     }
 
 # User list
@@ -45,9 +80,9 @@
     }
     # If the user folders cannot be found with the Windows XP path, it probably doesn't exist, let the user know
     if (-not (Test-Path $PathtoUserDir)) {
-      Write-Host "     WARNING: No users were found on this HDD/SSD. Bummer. These will be left blank." -ForegroundColor Yellow
+      Write-Host "WARNING: No users were found on this HDD/SSD. Bummer. These will be left blank." -ForegroundColor Yellow
       # Set the scraped user list variable to a blank array so that the rest of the script has "data" to put in the csv
-      $ScrapedUserList = @()
+      $ScrapedUserList = "NotFound", "Test"
     }
     # If the user folders can be found, get a list of all the profile folders found there
     if (Test-Path $PathtoUserDir){
@@ -58,9 +93,9 @@
     # Create an Object that will contain the information
     $SavedHDDInformation = New-Object PSObject
     # Add the column for the HDDIndexNumber that will be used to identify the individual HDD
-    $SavedHDDInformation | add-member â€“membertype NoteProperty â€“name HDDIndexNumber â€“Value $NewHDDIndexNumber
+    $SavedHDDInformation | add-member –membertype NoteProperty –name HDDIndexNumber –Value $NewHDDIndexNumber
     # Add the column for the Host Name information that has been pulled from the HDD
-    $SavedHDDInformation | add-member â€“membertype NoteProperty â€“name HostName â€“Value $ScrapedHostName
+    $SavedHDDInformation | add-member –membertype NoteProperty –name HostName –Value $ScrapedHostName
 
     # Set a counter that will increment for each user profile found on the HDD
     $UserCount = 0
@@ -76,7 +111,7 @@
       # Set the Object's Host name Value to the HostName Value pulled from the HDD
       $SavedHDDInformation.HostName = $ScrapedHostName
       # Create a column named after the user counter value and set the value to the current user in the list
-      Add-Member -InputObject $SavedHDDInformation â€“membertype NoteProperty â€“name $PropName -Value $_[0].Name
+      Add-Member -InputObject $SavedHDDInformation –membertype NoteProperty –name $PropName -Value $_[0].Name
     }
 
 # Write-out
@@ -92,10 +127,10 @@
 
     # Append this information to the spreadsheet file
     $SavedHDDInformation | Export-CSV $SavedHDDCatalog -NoType -Append -Force
-    Write-Host 'Saved. Please Label the HDD/SSD with the HDD Index Number found above.' -ForegroundColor Green
+    Write-Host 'SAVED. Please Label the HDD/SSD with the HDD Index Number found above.' -ForegroundColor Green
     }
 
     # If the user doesn't like the info, let them know it won't be saved
     if ($UserConfirmation -eq 'N'){
-    Write-Host '!!!THIS INFORMATION HAS NOT BEEN SAVED!!!' -ForegroundColor Red
+    Write-Host 'WARNING: User declined save operation. This information will not be appended to the Catalog file.' -ForegroundColor Red
     }
