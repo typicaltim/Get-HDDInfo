@@ -43,7 +43,7 @@
     # If the HDD does have that log file, go ahead and do this:
     if (Test-Path $PathToNetSetupLog) {
         # Find the line that contains the Host Name
-        $DebugHostnameScrape = select-string -path $PathToNetSetupLog -SimpleMatch -Pattern "NetpGetComputerObjectDn: Cracking account name" | Select-Object -First 1
+        $DebugHostnameScrape = select-string -path $PathToNetSetupLog -SimpleMatch -Pattern "NetpGetComputerObjectDn: Cracking account name" | Select-Object -Last 1
         # Seperate the strings into an arrray
         $SplitDebugHostnameScrape = $DebugHostnameScrape -split ' '
         # Select the Host Name from the array
@@ -112,7 +112,7 @@
     # Append this information to the spreadsheet file
     $SavedHDDInformation | Export-CSV $SavedHDDCatalog -NoType -Append -Force
     # Let the user know that the information is saved and give them the number to put on the drive
-    Write-Host "SAVED: Please Label the HDD/SSD with the number " -ForegroundColor Green -nonewline; Write-Host " $NewHDDIndexNumber " -BackgroundColor White -ForegroundColor Black;
+    Write-Host "SAVED: Please Label the drive with the number " -ForegroundColor Green -nonewline; Write-Host " $NewHDDIndexNumber " -BackgroundColor White -ForegroundColor Black;
     }
 
     # If the user doesn't like the info, let them know it won't be saved
